@@ -1,0 +1,33 @@
+@startuml state machine
+hide empty description
+skinparam maxMessageSize 120
+mainframe **state diagram** Заказ
+state end <<end>>
+state choice <<choice>>
+
+[*] --> CREATED : Клиент создал заказ
+CREATED --> AWAITING_PAYMENT : [Все товары в заказе в наличии]
+CREATED --> UNAVAILABLE_PRODUCTS : [Не все товары в наличии]
+    UNAVAILABLE_PRODUCTS --> CANCELLED : Клиент отменил заказ
+    UNAVAILABLE_PRODUCTS --> CREATED : Клиент изменил состав заказа
+AWAITING_PAYMENT --> CONFIRMED : Клиент оплатил заказ
+CONFIRMED --> PROCESSING : Наступила дата доставки
+PROCESSING --> choice : Формируется машрут доставки
+    choice --> ROUTE_IS_FORMED : Маршрут доставки сфорирован
+    choice --> COURIER_OR_TRANSPORT_ARE_NOT_FOUND: Не найден курьер и/или ТС
+        COURIER_OR_TRANSPORT_ARE_NOT_FOUND --> CONFIRMED : Клиент изменил дату доставки
+ROUTE_IS_FORMED --> ASSEMBLY : Заказ передали на сборку
+ASSEMBLY --> ASSEMBLED : Заказ собрали
+ASSEMBLED --> SUBMITTED_FOR_DELIVERY : Заказ подготовили к отправке
+SUBMITTED_FOR_DELIVERY --> DELIVERY_PROCESS : Заказ передали в доставку
+DELIVERY_PROCESS --> DELIVERED : Заказ доставили
+
+COURIER_OR_TRANSPORT_ARE_NOT_FOUND --> CANCELLED : Клиент отменил заказ
+CONFIRMED --> CANCELLED : Клиент отменил заказ
+AWAITING_PAYMENT --> CANCELLED : Клиент отменил заказ
+
+
+DELIVERED --> [*]
+CANCELLED --> end
+
+@enduml
